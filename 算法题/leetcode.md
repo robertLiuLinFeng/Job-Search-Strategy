@@ -3,6 +3,7 @@
 #### 目录: 
 
 * [数组和字符串](#1)
+    * [1. 搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 * [链表](#2)
     * [1. 两两交换链表中的结点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
 * [树与二叉树](#3)
@@ -20,7 +21,82 @@
 
 <h2 id="1"> 1. 数组和字符串 </h2>
 
+[1. 搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 
+这一题看到对时间复杂度的要求，应该就可以想到要用"二分法来求解"。但是二分法要求原始序列是有序的，怎么办呢?
+
+对于下面这个例子: nums: [4,5,6,7,0,1,2]
+
+如果我们能先找到它的旋转点nums[4] = 0，以nums[4]为中间点，不就把原始的数组分成了两个有序的数组: 
+
+nums[0, ..., 3]、nums[4, ..., 6]，然后再到这两个有序数组中就可以使用二分查找了。
+
+下面的难点是如下寻找旋转点 --- 还是用二分查找法:
+对于旋转点来说，它一定满足它的前一个元素>旋转点，mid = left + (right - left) / 2
+
+若nums[mid - 1] > nums[mid]: 则mid对应的二元素为旋转点
+若nums[mid] > nums[mid + 1]: 则mid + 1对应的元素为旋转点
+若nums[left] > nums[mid]: 假设nums[left] = 4, nums[mid] = 2，则旋转点一定在mid的左边，则置right = mid - 1
+若nums[left] < nums[mid]: 假设nums[left] = 4, nums[mid] = 7，则旋转点一定在mid的右边，则置left = mid + 1
+
+```cpp
+class Solution {
+public:
+    // 找到旋转点
+    int searchPivot(vector<int>& nums) {
+        int left = 0, right = nums.size()-1, mid = -1;
+        while(left < right) {
+            mid = left + (right - left) / 2;
+            if(mid-1 >= 0 && nums[mid-1] > nums[mid])
+                return mid;
+            else if(mid+1 < nums.size() && nums[mid] > nums[mid+1])
+                return mid+1;
+            else if(nums[left] < nums[mid])
+                left = mid + 1;
+            else if(nums[left] > nums[mid])
+                right = mid - 1;
+        }
+        return left;
+    }
+
+    int searchTarget(vector<int>& nums, int left, int right, int target) {
+        int mid = -1;
+        while(left <= right) {
+            mid = left + (right - left) / 2;
+            if(target == nums[mid]) {
+                return mid;
+            }
+            else if(nums[mid] > target) {
+                right = mid - 1;
+            }
+            else {
+                left = mid + 1;
+            }
+        }
+        return -1;
+    }
+
+    int search(vector<int>& nums, int target) {
+        if(nums.size() == 0) {
+            return -1;
+        }
+
+        int N = nums.size();
+        if(nums[0] <= nums[N-1]) {
+            return searchTarget(nums, 0, N-1, target);
+        }
+        else {
+            int pivot = searchPivot(nums);
+            if(target >= nums[0]) {
+                return searchTarget(nums, 0, pivot-1, target);
+            }
+            else {
+                return searchTarget(nums, pivot, nums.size()-1, target);
+            }
+        }
+    }
+};
+```
 
 <h2 id="2"> 2. 链表 </h2>
 
