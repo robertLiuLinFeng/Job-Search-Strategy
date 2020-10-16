@@ -4,6 +4,7 @@
 
 * [数组和字符串](#1)
     * [1. 搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+    * [2. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
 * [链表](#2)
     * [1. 两两交换链表中的结点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
 * [树与二叉树](#3)
@@ -97,6 +98,64 @@ public:
     }
 };
 ```
+
+[2. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
+
+解法1：直接排序
+
+最简单直接的解法就是对数组中的所有元素先平方，然后排序，时间复杂度为$O(nlogn)$。但是，这个解法显然不是面试官想要的。
+
+解法2：双指针 >>> 时间复杂度为$O(n)$的解法
+
+以[-4, -1, 0, 3, 10]为例: 
+
+* 如果所有的数都是正数，那么越大的数，平方就越大
+* 如果所有的数都是负数，那么越大的数，平方就越小
+
+可以用两个指针i、j分别指向最大的负数、最小的正数，然后取平方后比较小的那个数即可。
+
+```cpp
+class Solution {
+public:
+    vector<int> sortedSquares(vector<int>& A) {
+        int i = -1, j = 0;
+        // O(n)的时间复杂度找到负数、正数的分界处
+        for(int k = 0; k < A.size(); k++) {
+            if(k+1 < A.size() && A[k] < 0 && A[k+1] >= 0) {
+                i = k;
+                j = k+1;
+            }
+        }
+        vector<int> res(A.size(), 0);
+        int k = 0;
+        while(i >= 0 && j < A.size()) {
+            int i_i = A[i] * A[i], j_j = A[j] * A[j];
+            if(i_i < j_j) {
+                res[k++] = i_i;
+                i--;
+            }
+            else {
+                res[k++] = j_j;
+                j++;
+            }
+        }
+
+        while(i >= 0) {
+            res[k++] = A[i] * A[i--];
+        }
+
+        while(j < A.size()) {
+            res[k++] = A[j] * A[j++];
+        }
+
+        return res;
+    }
+};
+```
+
+
+
+
 
 <h2 id="2"> 2. 链表 </h2>
 
