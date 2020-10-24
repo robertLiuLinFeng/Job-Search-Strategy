@@ -7,6 +7,7 @@
     * [2. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
 * [链表](#2)
     * [1. 两两交换链表中的结点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
+    * [2. 重排链表](https://leetcode-cn.com/problems/reorder-list/)
 * [树与二叉树](#3)
 * [队列和栈](#4)
 * [堆](#5)
@@ -21,6 +22,8 @@
 ***
 
 <h2 id="1"> 1. 数组和字符串 </h2>
+
+**前言: 关于数组和字符串的题，个人认为是最难的，因为它不像链表、二叉树、DFS/BFS等那种有解题套路的题目，数组背景可以衍生出很多很多的算法题，甚至是找规律和数学类型的题，所以对于数组这个模块，我建议只需要掌握一些经典的算法，然后多积累即可。**
 
 [1. 搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 
@@ -105,7 +108,7 @@ public:
 
 最简单直接的解法就是对数组中的所有元素先平方，然后排序，时间复杂度为$O(nlogn)$。但是，这个解法显然不是面试官想要的。
 
-解法2：双指针 >>> 时间复杂度为$O(n)$的解法
+**解法2：双指针 >>> 时间复杂度为$O(n)$的解法**
 
 以[-4, -1, 0, 3, 10]为例: 
 
@@ -159,6 +162,13 @@ public:
 
 <h2 id="2"> 2. 链表 </h2>
 
+**前言: 链表包含单链表、双向链表、循环链表，在解答相关的题目的时候，把图画出来，仔细一点一般没有什么问题**。这里总结一下链表相关的经典算法题有哪些: 
+
+* 回文链表 (快慢指针)
+* 链表反转
+* 有序链表合并
+* 环形链表 (快慢指针的应用)
+
 [1. 两两交换链表中的结点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
 
 假设p、p_next为两个待交换的结点，要保证链表不断，还需要知道p的前驱结点pre、p_next的后继结点p_next_next，思路如下: 
@@ -189,6 +199,61 @@ public:
             p_next = p ? p->next : nullptr;
         }
         return newHead->next;
+    }
+};
+```
+
+[2. 重排链表](https://leetcode-cn.com/problems/reorder-list/)
+
+假设给定链表为 1 -> 2 -> 3 -> 4，首先我们**找到链表的中间结点**，将原始链表拆分为两个链表1 -> 2、3 -> 4，然后将第2个**链表反转**，再依次插入到第1个链表中。
+
+主要是下面三个重要的点: 
+
+* 找到链表的中间结点  >>>  快慢指针
+* 链表反转
+* 链表合并
+
+```cpp
+class Solution {
+public:
+    // 链表反转
+    ListNode* reverseList(ListNode *head) {
+        ListNode *pre = nullptr, *cur = head, *cur_next = nullptr;
+        while(cur) {
+            cur_next = cur->next;
+            cur->next = pre;
+            pre = cur;
+            cur = cur_next;
+        }
+        return pre;
+    }
+
+    void reorderList(ListNode* head) {
+        if(!head || !head->next) 
+            return;
+        
+        ListNode *slow = head, *fast = head;
+        // 快慢指针寻找中间结点
+        while(fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        // 将原链表拆分为两个链表head、head2，head1的长度 >= head2
+        ListNode *head2 = slow->next;
+        slow->next = nullptr;
+        // 链表2反转
+        head2 = reverseList(head2);
+
+        slow = head, fast = head2;
+        while(fast) {
+            ListNode *node = fast;
+            fast = fast->next;
+
+            node->next = slow->next;
+            slow->next = node;
+
+            slow = node->next;
+        }
     }
 };
 ```
