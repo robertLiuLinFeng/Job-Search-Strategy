@@ -8,6 +8,7 @@
 * [链表](#2)
     * [1. 两两交换链表中的结点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
     * [2. 重排链表](https://leetcode-cn.com/problems/reorder-list/)
+    * [3. 回文链表](https://leetcode-cn.com/problems/palindrome-linked-list/)
 * [树与二叉树](#3)
 * [队列和栈](#4)
 * [堆](#5)
@@ -23,7 +24,7 @@
 
 <h2 id="1"> 1. 数组和字符串 </h2>
 
-**前言: 关于数组和字符串的题，个人认为是最难的，因为它不像链表、二叉树、DFS/BFS等那种有解题套路的题目，数组背景可以衍生出很多很多的算法题，甚至是找规律和数学类型的题，所以对于数组这个模块，我建议只需要掌握一些经典的算法，然后多积累即可。**
+**前言: 关于数组和字符串的题，个人认为是最难的，因为它不像链表、二叉树、DFS/BFS等那种有解题套路的题目，数组背景可以衍生出很多很多的算法题，甚至是找规律和数学类型的题，所以对于数组这个模块，我的想法是只需要掌握一些经典的算法，然后多积累即可。**
 
 [1. 搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 
@@ -254,6 +255,87 @@ public:
 
             slow = node->next;
         }
+    }
+};
+```
+
+[3. 回文链表](https://leetcode-cn.com/problems/palindrome-linked-list/)
+
+所谓的回文链表就是以中间结点为对称轴，表现出对称的特性的链表。比如说: 
+
+* [1, 2, 2, 1]
+* [1, 2, 3, 2, 1]
+
+比较容易想到的解法就是利用栈的反向特性，先遍历链表并加入到栈中，然后依次出栈并且与链表的头结点开始比较。这样的做法的复杂度如下: 
+
+* 空间复杂度: $O(n)$
+* 时间复杂度: $O(n)$
+
+下面是一种空间复杂度为$O(1)$的解法。以[1, 2, 2, 1]为例。
+
+先将原始链表从中间结点分开，得到两个链表[1, 2]、[2, 1]，然后将第二个链表反转，得到[1, 2]、[1, 2]，再依次从头开始遍历，比较每个结点是否相等。
+
+下面的问题就是: 
+
+* 如何找到链表的中间结点
+* 如何将链表进行反转
+
+**寻找链表的中间结点 >>> 快慢指针**
+
+用两个指针slow、fast都指向链表的第一个结点，slow的步长为1，fast的步长为2，当fast == NULL 或 fast->next == NULL的时候，slow指向的就是链表的中间结点。
+
+图示如下: 
+
+![1](./leetcode_imageset/1.png)
+
+然后需要注意的是: 在将原始链表拆分为两个链表的情况下
+
+* 当fast == NULL，slow指向的结点就是第2个链表的头结点，此时原始链表的结点个数为偶数
+* 当fast->next == NULL，slow->next指向的结点是第2个链表的头结点，此时原始链表的结点个数为奇数
+
+完整代码如下: 
+
+```cpp
+class Solution {
+public:
+    // 链表反转
+    ListNode* reverseList(ListNode* head) {
+        ListNode *pre = nullptr, *cur = head, *cur_next = nullptr;
+        while(cur) {
+            cur_next = cur->next;
+            cur->next = pre;
+            pre = cur;
+            cur = cur_next;
+        }
+        return pre;
+    }
+
+    bool isPalindrome(ListNode* head) {
+        // 如果链表为空，或者只有一个结点，则为回文链表
+        if(!head || !head->next) {
+            return true;
+        }
+
+        ListNode *slow = head, *fast = head;
+        // 快慢指针寻找中间结点
+        while(fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+		// 将原始链表拆分为两个链表
+        ListNode *head2 = fast ? slow->next : slow;
+        // 链表2反转
+        head2 = reverseList(head2);
+        
+        slow = head, fast = head2;
+        // 从头开始遍历链表1和链表2，判断每个结点的值是否相等
+        while(fast) {
+            if(slow->val != fast->val)
+                return false;
+            slow = slow->next;
+            fast = fast->next;
+        }
+        return true;
     }
 };
 ```
